@@ -1,0 +1,15 @@
+gevent
+requests
+av
+flask
+Pillow
+opencv-python-headless
+setproctitle
+psutil
+onvif-zeep
+cloudpickle
+redis
+Flask-Cors
+flask-httpauth
+Pillow
+numpy

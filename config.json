@@ -1,0 +1,7 @@
+{
+  "format": "flv",
+  "container_options":{
+    "listen": "1",
+    "fflags": "nobuffer"
+}
+}
