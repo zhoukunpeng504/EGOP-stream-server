@@ -268,15 +268,18 @@ def av_recv_function(rtmp_port, rtmp_path, sub_scribe_key, redis_url, process_na
                                  'pts': target_packet.pts,
                                  "is_key": target_packet.is_keyframe,
                                  "late_iframe_counter": late_iframe_counter,
-                                 "packet_type": "video"
+                                 "packet_type": "video",
+                                 'frame_ndarray': target_frame.to_ndarray(),
+                                 'frame_format': target_frame.format.name,
+                                 'frame_pts': target_packet.pts
                                  }
                             )
-                        redis_conn.hset(f'{sub_scribe_key}-cache',
-                                        str(v_counter % 500),
-                                        pickle.dumps({'frame_ndarray': target_frame.to_ndarray(),
-                                                      'frame_format': target_frame.format.name,
-                                                      'frame_pts': target_packet.pts})
-                                        )
+                        # redis_conn.hset(f'{sub_scribe_key}-cache',
+                        #                 str(v_counter % 500),
+                        #                 pickle.dumps({'frame_ndarray': target_frame.to_ndarray(),
+                        #                               'frame_format': target_frame.format.name,
+                        #                               'frame_pts': target_packet.pts})
+                        #                 )
 
                         try:
                             redis_conn.publish(sub_scribe_key, send_data)
@@ -552,11 +555,14 @@ def av_mux_function(sub_scribe_key, redis_url, queue_key):
                     # 需要特殊处理。
                     # 从cache中取出frame.
                     # 此部分是关键逻辑
-                    cache_data = pickle.loads(redis_conn.hget(f'{sub_scribe_key}-cache',
-                                    str(packet_counter % 500)))
-                    v_frame = av_video.frame.VideoFrame.from_ndarray(cache_data['frame_ndarray'],
-                                                                     format=cache_data['frame_format'])
-                    v_frame.pts = cache_data['frame_pts']
+                    # cache_data = pickle.loads(redis_conn.hget(f'{sub_scribe_key}-cache',
+                    #                 str(packet_counter % 500)))
+                    # v_frame = av_video.frame.VideoFrame.from_ndarray(cache_data['frame_ndarray'],
+                    #                                                 format=cache_data['frame_format'])
+                    # v_frame.pts = cache_data['frame_pts']
+                    v_frame = av_video.frame.VideoFrame.from_ndarray(item_data['frame_ndarray'],
+                                                                     format=item_data['frame_format'])
+                    v_frame.pts = item_data['frame_pts']
                     v_frame.dts = v_frame.pts
                     v_handle_flag = 1
                     decode_res_1 = h264_codec_w.encode(v_frame)
